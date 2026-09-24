@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FC Online Simulator - Mở & Cường Hoá Thẻ</title>
+    <style>
+        :root {
+            --bg-color: #0b0e14;
+            --card-bg: #1a2232;
+            --accent-gold: #f39c12;
+            --accent-green: #2ecc71;
+            --accent-red: #e74c3c;
+            --text-color: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            width: 100%;
+            background: rgba(20, 28, 44, 0.9);
+            padding: 15px 0;
+            text-align: center;
+            border-bottom: 2px solid var(--accent-gold);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 20px padding;
+            width: 100%;
+        }
+
+        .section-box {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            width: 320px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Card Design */
+        .fco-card {
+            width: 160px;
+            height: 240px;
+            background: linear-gradient(135deg, #2c3e50, #000000);
+            border: 2px solid var(--accent-gold);
+            border-radius: 10px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            box-sizing: border-box;
+            box-shadow: 0 0 15px rgba(243, 156, 18, 0.3);
+            margin: 15px 0;
+            transition: transform 0.3s;
+        }
+
+        .fco-card:hover {
+            transform: scale(1.03);
+        }
+
+        .card-top {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-ovr {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-gold);
+        }
+
+        .card-pos {
+            font-size: 14px;
+            font-weight: bold;
+            color: #aaa;
+        }
+
+        .card-level {
+            background: var(--accent-gold);
+            color: #000;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .card-avatar {
+            font-size: 50px;
+            margin: 10px 0;
+        }
+
+        .card-name {
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
+        .card-season {
+            font-size: 12px;
+            color: var(--accent-gold);
+            font-weight: bold;
+        }
+
+        /* Buttons */
+        button {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            border: none;
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Inventory List */
+        .inventory-list {
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .inventory-item {
+            background: rgba(0,0,0,0.3);
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .inventory-item .info {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .select-btn {
+            width: auto;
+            padding: 4px 8px;
+            margin: 0;
+            font-size: 11px;
+        }
+
+        /* Result Animation Text */
+        .result-text {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+            min-height: 24px;
+            text-align: center;
+        }
+
+        .success { color: var(--accent-green); }
+        .fail { color: var(--accent-red); }
+
+        /* Animation Keyframes */
+        @keyframes packOpen {
+            0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .animate-open {
+            animation: packOpen 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>FC ONLINE SIMULATOR</h1>
+    </header>
+
+    <div class="container">
+        <!-- Khu vực Mở Thẻ -->
+        <div class="section-box">
+            <h2>MỞ THẺ CẦU THỦ</h2>
+            <div id="pack-card-display">
+                <div class="fco-card" style="justify-content: center; opacity: 0.5;">
+                    <span>Nhấn nút bên dưới để mở gói</span>
+                </div>
+            </div>
+            <button onclick="openPack()">MỞ GÓI TOTY / ICON (+0)</button>
+        </div>
+
+        <!-- Khu vực Cường Hóa (Đập thẻ) -->
+        <div class="section-box">
+            <h2>CƯỜNG HOÁ THẺ (ĐẬP THẺ)</h2>
+            <div id="upgrade-card-display">
+                <div class="fco-card" style="justify-content: center; opacity: 0.5;">
+                    <span>Chọn cầu thủ từ túi đồ</span>
+                </div>
+            </div>
+            <div id="upgrade-result" class="result-text"></div>
+            <button id="upgrade-btn" onclick="upgradeCard()" disabled>CƯỜNG HOÁ</button>
+        </div>
+
+        <!-- Túi đồ (Inventory) -->
+        <div class="section-box">
+            <h2>TÚI ĐỒ DỰ TRỮ</h2>
+            <div class="inventory-list" id="inventory">
+                <!-- Danh sách cầu thủ sẽ xuất hiện ở đây -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Database cầu thủ giả lập
+        const playerDatabase = [
+            { name: "C. Ronaldo", pos: "ST", ovr: 108, season: "24TOTY", icon: "⚽" },
+            { name: "L. Messi", pos: "RW", ovr: 108, season: "24TOTY", icon: "🐐" },
+            { name: "K. Mbappé", pos: "ST", ovr: 107, season: "24TOTY", icon: "⚡" },
+            { name: "J. Bellingham", pos: "CM", ovr: 106, season: "24TOTY", icon: "👑" },
+            { name: "Ronaldo Nazário", pos: "ST", ovr: 110, season: "ICON", icon: "🇧🇷" },
+            { name: "Z. Zidane", pos: "CAM", ovr: 109, season: "ICON", icon: "🇫🇷" },
+            { name: "S. Ramos", pos: "CB", ovr: 104, season: "24TOTY", icon: "🛡️" },
+            { name: "Thibaut Courtois", pos: "GK", ovr: 103, season: "24TOTY", icon: "🧤" }
+        ];
+
+        let inventory = [];
+        let selectedPlayerIndex = null;
+
+        // Tỷ lệ thành công ép thẻ theo cấp độ (+1 lên +2, +2 lên +3, ...)
+        const upgradeRates = {
+            1: 1.00, // +1 lên +2: 100%
+            2: 0.81, // +2 lên +3: 81%
+            3: 0.64, // +3 lên +4: 64%
+            4: 0.50, // +4 lên +5: 50%
+            5: 0.26, // +5 lên +6: 26%
+            6: 0.15, // +6 lên +7: 15%
+            7: 0.07, // +7 lên +8: 7%
+            8: 0.03, // +8 lên +9: 3%
+            9: 0.01  // +9 lên +10: 1%
+        };
+
+        // Hàm Mở gói thẻ
+        function openPack() {
+            const randomIndex = Math.floor(Math.random() * playerDatabase.length);
+            const basePlayer = playerDatabase[randomIndex];
+            
+            const newPlayer = {
+                ...basePlayer,
+                id: Date.now(),
+                level: 1,
+                currentOvr: basePlayer.ovr
+            };
+
+            inventory.push(newPlayer);
+            renderCard(newPlayer, 'pack-card-display', true);
+            renderInventory();
+        }
+
+        // Tạo giao diện HTML cho thẻ cầu thủ
+        function createCardHTML(player) {
+            return `
+                <div class="fco-card animate-open">
+                    <div class="card-top">
+                        <span class="card-ovr">${player.currentOvr}</span>
+                        <span class="card-pos">${player.pos}</span>
+                        <span class="card-level">+${player.level}</span>
+                    </div>
+                    <div class="card-avatar">${player.icon}</div>
+                    <div class="card-name">${player.name}</div>
+                    <div class="card-season">${player.season}</div>
+                </div>
+            `;
+        }
+
+        function renderCard(player, targetId, animate = false) {
+            const container = document.getElementById(targetId);
+            container.innerHTML = createCardHTML(player);
+        }
+
+        // Hiển thị túi đồ
+        function renderInventory() {
+            const invContainer = document.getElementById('inventory');
+            invContainer.innerHTML = '';
+
+            if (inventory.length === 0) {
+                invContainer.innerHTML = '<div style="text-align:center; color:#777;">Túi đồ trống</div>';
+                return;
+            }
+
+            inventory.forEach((player, index) => {
+                const item = document.createElement('div');
+                item.className = 'inventory-item';
+                item.innerHTML = `
+                    <div class="info">
+                        <strong>+${player.level}</strong>
+                        <span>${player.name}</span>
+                        <small>(${player.currentOvr})</small>
+                    </div>
+                    <button class="select-btn" onclick="selectForUpgrade(${index})">Chọn</button>
+                `;
+                invContainer.appendChild(item);
+            });
+        }
+
+        // Chọn thẻ để đập
+        function selectForUpgrade(index) {
+            selectedPlayerIndex = index;
+            const player = inventory[index];
+            renderCard(player, 'upgrade-card-display');
+            
+            const upgradeBtn = document.getElementById('upgrade-btn');
+            document.getElementById('upgrade-result').innerText = '';
+
+            if (player.level >= 10) {
+                upgradeBtn.disabled = true;
+                upgradeBtn.innerText = "ĐÃ ĐẠT CẤP TỐI ĐA (+10)";
+            } else {
+                upgradeBtn.disabled = false;
+                const rate = (upgradeRates[player.level] * 100).toFixed(0);
+                upgradeBtn.innerText = `CƯỜNG HOÁ LÊN +${player.level + 1} (${rate}% THÀNH CÔNG)`;
+            }
+        }
+
+        // Xử lý Cường Hóa (Đập thẻ)
+        function upgradeCard() {
+            if (selectedPlayerIndex === null) return;
+
+            const player = inventory[selectedPlayerIndex];
+            const currentLevel = player.level;
+
+            if (currentLevel >= 10) return;
+
+            const successRate = upgradeRates[currentLevel];
+            const isSuccess = Math.random() < successRate;
+
+            const resultDiv = document.getElementById('upgrade-result');
+            const upgradeBtn = document.getElementById('upgrade-btn');
+
+            upgradeBtn.disabled = true;
+
+            if (isSuccess) {
+                // Thành công: Tăng +1 cấp, tăng +1 chỉ số OVR
+                player.level += 1;
+                player.currentOvr += 1;
+                resultDiv.className = "result-text success";
+                resultDiv.innerText = `ÉP THÀNH CÔNG LÊN +${player.level}! 🎉`;
+            } else {
+                // Thất bại: Trở về +1 (Thẻ rác/Thẻ vỡ)
+                player.level = 1;
+                player.currentOvr = player.ovr;
+                resultDiv.className = "result-text fail";
+                resultDiv.innerText = "ÉP THẤT BẠI! THẺ ĐÃ BỊ TỤT VỀ +1 💥";
+            }
+
+            // Cập nhật giao diện
+            renderCard(player, 'upgrade-card-display', true);
+            renderInventory();
+
+            // Cập nhật trạng thái nút bấm
+            setTimeout(() => {
+                selectForUpgrade(selectedPlayerIndex);
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
